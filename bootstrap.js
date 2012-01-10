@@ -7,6 +7,9 @@ Cm.QueryInterface(Ci.nsIComponentRegistrar);
 const nsIAppStartup = Ci.nsIAppStartup_MOZILLA_2_0 || Ci.nsIAppStartup;
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
+
+var location;
 
 function AboutStartup() {}
 
@@ -18,18 +21,12 @@ AboutStartup.prototype = {
 
   newChannel: function(uri)
   {
-    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-    var html = 'data:text/html,<html><body><table>';
-    var startupInfo = Cc['@mozilla.org/toolkit/app-startup;1'].getService(nsIAppStartup).getStartupInfo();
-    var keys = Object.keys(startupInfo);
-    keys.sort(function(a, b) { return startupInfo[a] - startupInfo[b]; });
-    for each (var name in keys)
-      if (name != 'process')
-        html += '<tr><td>' + name + '</td><td>' + (startupInfo[name] - startupInfo.process) + '</td></tr>';
-    html += '</table></body></html>';
-    var channel = ioService.newChannel(html, null, null);
+    var fileuri = Services.io.newFileURI(location);
+    if (!location.isDirectory())
+      fileuri = Services.io.newURI('jar:' + fileuri.spec + '!/', null, null);
+    var channel = Services.io.newChannel(fileuri.spec + 'aboutstartup.html', null, null);
     var securityManager = Cc['@mozilla.org/scriptsecuritymanager;1'].getService(Ci.nsIScriptSecurityManager);
-    var principal = securityManager.getCodebasePrincipal(uri);
+    var principal = securityManager.getSystemPrincipal(uri);
     channel.originalURI = uri;
     channel.owner = principal;
     return channel;
@@ -37,7 +34,7 @@ AboutStartup.prototype = {
 
   getURIFlags: function(uri)
   {
-    return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT;
+    return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT | Ci.nsIAboutModule.ALLOW_SCRIPT;
   }
 }
 
@@ -49,10 +46,9 @@ const PR_WRONLY = 0x02;
 const PR_APPEND = 0x10;
 
 function saveData() {
-  var prefs = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).getBranch('extensions.aboutstartup.');
   var last;
   try {
-    last = prefs.getIntPref('last');
+    last = Services.prefs.getIntPref('extensions.aboutstartup.last');
   } catch(e) {
     last = 0;
   }
@@ -66,10 +62,9 @@ function saveData() {
   for each (var name in keys)
     if (name != 'process')
       data[name] = startupInfo[name] - startupInfo.process;
-  var appInfo = Cc['@mozilla.org/xre/app-info;1'].getService(Ci.nsIXULAppInfo);
-  data.version = appInfo.version;
-  data.appBuildID = appInfo.appBuildID;
-  var file = Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
+  data.version = Services.appinfo.version;
+  data.appBuildID = Services.appinfo.appBuildID;
+  var file = Services.dirsvc.get('ProfD', Ci.nsIFile);
   file.append('startup.log');
   if (!file.exists())
       file.create(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0666);
@@ -79,7 +74,7 @@ function saveData() {
   writer.init(foStream, "UTF-8", 0, 0x0000);
   writer.writeString(JSON.stringify(data) + "\n");
   writer.close();
-  prefs.setIntPref('last', start);
+  Services.prefs.setIntPref('extensions.aboutstartup.last', start);
 }
 
 const APP_STARTUP = 1;
@@ -91,6 +86,7 @@ function startup(aData, aReason) {
                      AboutStartup.prototype.classDescription,
                      AboutStartup.prototype.contractID,
                      AboutStartupFactory);
+  location = aData.installPath;
   if (aReason == APP_STARTUP) {
     timer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     timer.initWithCallback(saveData, 10000, Ci.nsITimer.TYPE_ONE_SHOT);

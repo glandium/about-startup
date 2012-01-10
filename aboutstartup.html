@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>About Startup</title>
+<script>
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+function init() {
+  var table = document.getElementById('table');
+  document.body.appendChild(table);
+  var file = Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
+  file.append('startup.log');
+  if (!file.exists())
+    return;
+  var fiStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
+  fiStream.init(file, -1, -1, 0);
+  var liStream = fiStream.QueryInterface(Ci.nsILineInputStream);
+  var lineData = {};
+  var data = {};
+  var cont;
+  do {
+    cont = liStream.readLine(lineData);
+    var entry = JSON.parse(lineData.value);
+    var index = entry.version + '|' + entry.appBuildID;
+    if (!(index in data))
+      data[index] = new Array();
+    data[index].push(entry);
+  } while (cont);
+  fiStream.close();
+  var prev;
+  var headers = table.getElementsByTagName('tr')[0].getElementsByTagName('th');
+  for (var d in data) {
+    var total = { main: 0, sessionRestored: 0, firstPaint: 0 };
+    var num = { main: 0, sessionRestored: 0, firstPaint: 0 };
+    for (var index = 0; index < data[d].length; index++) {
+      var entry = data[d][index];
+      var tr = document.createElement('tr');
+      var prev_value = 0;
+      for (var h = 0; h < headers.length; h++) {
+        var td = document.createElement('td');
+        var value = entry[headers[h].textContent];
+        td.className = headers[h].className;
+        td.appendChild(document.createTextNode(td.className == "time" ? value - prev_value : value));
+        if (value < 0)
+          td.className += ' weird';
+        else if (td.className == "time") {
+          total[headers[h].textContent] += value - prev_value;
+          num[headers[h].textContent]++;
+        }
+        tr.appendChild(td);
+        prev_value = value;
+      }
+      if (prev)
+        table.insertBefore(tr, prev);
+      else
+        table.appendChild(tr);
+      prev = tr;
+    }
+    tr = document.createElement('tr');
+    tr.className = 'average';
+    for (var h = 0; h < headers.length; h++) {
+      var td = document.createElement('td');
+      td.className = headers[h].className;
+      var value = td.className == "time" ? (total[headers[h].textContent] / num[headers[h].textContent]).toFixed(2) : entry[headers[h].textContent];
+      td.appendChild(document.createTextNode(value));
+      tr.appendChild(td);
+    }
+    table.insertBefore(tr, prev);
+    prev = tr;
+  }
+}
+</script>
+<style>
+td { padding: 0 0.5em;}
+td.time { text-align: right;}
+.weird { color: red;}
+tr.average { background: #ccc;}
+</style>
+</head>
+<body onload="init()">
+<p>The following table contains the history of startup times as recorded by the About Startup extension. Highlighted in gray are averages for a given build. sessionRestored timings are relative to main, and firstPaint relative to sessionRestored.</p>
+<table id="table">
+<tr><th class="time">main</th><th class="time">sessionRestored</th><th class="time">firstPaint</th><th>version</th><th>appBuildID</th></tr>
+</table>
+</body>
+</html>
