@@ -4,6 +4,8 @@ const Cm = Components.manager;
 
 Cm.QueryInterface(Ci.nsIComponentRegistrar);
 
+const nsIAppStartup = Ci.nsIAppStartup_MOZILLA_2_0 || Ci.nsIAppStartup;
+
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 function AboutStartup() {}
@@ -18,7 +20,7 @@ AboutStartup.prototype = {
   {
     var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
     var html = 'data:text/html,<html><body><table>';
-    var startupInfo = Cc['@mozilla.org/toolkit/app-startup;1'].getService(Ci.nsIAppStartup_MOZILLA_2_0).getStartupInfo();
+    var startupInfo = Cc['@mozilla.org/toolkit/app-startup;1'].getService(nsIAppStartup).getStartupInfo();
     var keys = Object.keys(startupInfo);
     keys.sort(function(a, b) { return startupInfo[a] - startupInfo[b]; });
     for each (var name in keys)
@@ -54,7 +56,7 @@ function saveData() {
   } catch(e) {
     last = 0;
   }
-  var startupInfo = Cc['@mozilla.org/toolkit/app-startup;1'].getService(Ci.nsIAppStartup_MOZILLA_2_0).getStartupInfo();
+  var startupInfo = Cc['@mozilla.org/toolkit/app-startup;1'].getService(nsIAppStartup).getStartupInfo();
   var start = Math.floor(startupInfo.process / 1000);
   if (last >= start)
     return;
