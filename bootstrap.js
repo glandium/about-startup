@@ -65,7 +65,7 @@ function startup(aData, aReason) {
   if (aReason == APP_STARTUP) {
     Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer)
     .initWithCallback(saveData, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
-  } else if ((aReason == ADDON_ENABLE) || (aReason == ADDON_UPGRADE)) {
+  } else {
     saveData();
   }
 }

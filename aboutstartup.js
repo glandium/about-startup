@@ -12,7 +12,6 @@ function init() {
     return;
   }
   var table = document.getElementById('table');
-  document.body.appendChild(table);
   var data = StartupData._data;
   var prev;
   var headers = table.getElementsByTagName('tr')[0].getElementsByTagName('th');
