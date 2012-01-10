@@ -14,14 +14,17 @@ function init() {
   var table = document.getElementById('table');
   var data = StartupData._data;
   var prev;
-  var headers = table.getElementsByTagName('tr')[0].getElementsByTagName('th');
+  var headers_row = table.getElementsByTagName('tr')[0];
+  var headers = headers_row.getElementsByTagName('th');
   for each (var d in Object.keys(data).map(function(k) StartupData.key(data[k][0])).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
-    var total = { main: 0 };
-    var num = { main: 0 };
-    for (var index = 0; index < data[d].length; index++) {
-      var entry = data[d][index];
+    var total = { };
+    var num = { };
+    for (var h = 0; h < headers.length; h++) {
+      total[headers[h].textContent] = 0;
+      num[headers[h].textContent] = 0;
+    }
+    for each (var entry in data[d]) {
       var tr = document.createElement('tr');
-      var prev_value = 0;
       for (var h = 0; h < headers.length; h++) {
         var td = document.createElement('td');
         var value = entry[headers[h].textContent];
@@ -36,8 +39,30 @@ function init() {
           }
         }
         tr.appendChild(td);
-        prev_value = value;
       }
+      Object.keys(entry).filter(function(element, index, array) {
+        for (var h = 0; h < headers.length; h++)
+          if (element == headers[h].textContent)
+            return false;
+
+        return true;
+      }).forEach(function(key, index, array) {
+        total[key] = 0;
+        num[key] = 0;
+        var th = document.createElement('th');
+        th.appendChild(document.createTextNode(key));
+        headers_row.appendChild(th);
+        var td = document.createElement('td');
+        var value = entry[key];
+        td.appendChild(document.createTextNode(value));
+        if ((value < 0) || isNaN(value)) {
+          td.className += ' weird';
+        } else {
+          total[key] += value;
+          num[key]++;
+        }
+        tr.appendChild(td);
+      });
       if ((d == StartupData.key(StartupData.current)) &&
           StartupData.cmp(StartupData.current, entry))
         tr.className = 'current';
