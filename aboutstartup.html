@@ -4,8 +4,8 @@
 <title>About Startup</title>
 <script src="resource://aboutstartup/aboutstartup.js"></script>
 <style>
-td { padding: 0 0.5em;}
-td.time { text-align: right;}
+td { padding: 0 0.5em; text-align: right;}
+td.string { text-align: left;}
 .weird { color: red;}
 tr.average { background: #ccc;}
 tr.current { color: blue;}
@@ -14,7 +14,7 @@ tr.current { color: blue;}
 <body>
 <p>The following table contains the history of startup times as recorded by the About Startup extension. Highlighted in gray are averages for a given build. Highlighted in blue are values for the currently running instance. <!-- sessionRestored timings are relative to main, and firstPaint relative to sessionRestored. --></p>
 <table id="table">
-<tr><th class="time">main</th><th class="time">sessionRestored</th><th class="time">firstPaint</th><th>version</th><th>appBuildID</th></tr>
+<tr><th>main</th><th class="string">version</th><th class="string">appBuildID</th></tr>
 </table>
 </body>
 </html>

@@ -16,8 +16,8 @@ function init() {
   var prev;
   var headers = table.getElementsByTagName('tr')[0].getElementsByTagName('th');
   for each (var d in Object.keys(data).map(function(k) StartupData.key(data[k][0])).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
-    var total = { main: 0, sessionRestored: 0, firstPaint: 0 };
-    var num = { main: 0, sessionRestored: 0, firstPaint: 0 };
+    var total = { main: 0 };
+    var num = { main: 0 };
     for (var index = 0; index < data[d].length; index++) {
       var entry = data[d][index];
       var tr = document.createElement('tr');
@@ -27,14 +27,11 @@ function init() {
         var value = entry[headers[h].textContent];
         td.className = headers[h].className;
         td.appendChild(document.createTextNode(value));
-        //td.appendChild(document.createTextNode(td.className == "time" ? value - prev_value : value));
-        if (td.className == "time") {
-          //if ((value - prev_value < 0) || isNaN(value - prev_value)) {
+        if (td.className != "string") {
           if ((value < 0) || isNaN(value)) {
             td.className += ' weird';
           } else {
             total[headers[h].textContent] += value;
-            //total[headers[h].textContent] += value - prev_value;
             num[headers[h].textContent]++;
           }
         }
@@ -55,7 +52,7 @@ function init() {
     for (var h = 0; h < headers.length; h++) {
       var td = document.createElement('td');
       td.className = headers[h].className;
-      var value = td.className == "time" ? (total[headers[h].textContent] / num[headers[h].textContent]).toFixed(2) : entry[headers[h].textContent];
+      var value = td.className == "string" ? entry[headers[h].textContent] : (total[headers[h].textContent] / num[headers[h].textContent]).toFixed(2);
       td.appendChild(document.createTextNode(value));
       tr.appendChild(td);
     }
