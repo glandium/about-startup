@@ -39,18 +39,6 @@ const APP_STARTUP = 1;
 const ADDON_ENABLE = 3;
 const ADDON_UPGRADE = 7;
 
-var _StartupData;
-
-function saveData() {
-  try {
-    if (_StartupData)
-      _StartupData.save();
-  } catch(e) {
-     Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer)
-     .initWithCallback(saveData, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
-  }
-}
-
 function startup(aData, aReason) {
   Cm.registerFactory(AboutStartup.prototype.classID,
                      AboutStartup.prototype.classDescription,
@@ -61,20 +49,13 @@ function startup(aData, aReason) {
     fileuri = Services.io.newURI('jar:' + fileuri.spec + '!/', null, null);
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', fileuri);
   Components.utils.import('resource://aboutstartup/startupdata.jsm');
-  _StartupData = StartupData;
-  if (aReason == APP_STARTUP) {
-    Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer)
-    .initWithCallback(saveData, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
-  } else {
-    saveData();
-  }
 }
+
 function shutdown(aData, aReason) {
-  try {
-    _StartupData.save();
-  } catch(e) {}
-  // Stop any pending saveData()
-  _StartupData = undefined;
+  if (aReason == APP_SHUTDOWN)
+    try {
+      StartupData.save();
+    } catch(e) {}
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', null);
   Cm.unregisterFactory(AboutStartup.prototype.classID, AboutStartupFactory);
 }

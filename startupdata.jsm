@@ -29,7 +29,7 @@ XPCOMUtils.defineLazyGetter(StartupData, '_file', function () {
   return file;
 });
 
-XPCOMUtils.defineLazyGetter(StartupData, '_data', function () {
+StartupData.__defineGetter__('_data', function () {
   var fiStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
   if (!StartupData._file.exists())
     return {};
@@ -52,7 +52,7 @@ XPCOMUtils.defineLazyGetter(StartupData, '_data', function () {
   var index = StartupData.key(StartupData.current);
   if (!(index in data))
     data[index] = [StartupData.current]
-  else if (!StartupData.cmp(data[index][data[index].length - 1], StartupData.current))
+  else
     data[index].push(StartupData.current);
 
   return data;
@@ -74,11 +74,7 @@ StartupData.__defineGetter__('startupInfo', function () {
   var info = Cc['@mozilla.org/toolkit/app-startup;1']
              .getService(Ci.nsIAppStartup_MOZILLA_2_0 || Ci.nsIAppStartup)
              .getStartupInfo();
-  if (info['main'] === undefined)
-    throw "StartupInfo is incomplete";
- 
-  delete StartupData.startupInfo;
-  return StartupData.startupInfo = info;
+  return info;
 });
 
 StartupData.__defineGetter__('current', function() {
@@ -89,8 +85,7 @@ StartupData.__defineGetter__('current', function() {
 
   entry.version = Services.appinfo.version;
   entry.appBuildID = Services.appinfo.appBuildID;
-  delete StartupData.current;
-  return StartupData.current = entry;
+  return entry;
 });
 
 const PR_WRONLY = 0x02;

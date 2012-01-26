@@ -4,13 +4,6 @@ const Ci = Components.interfaces;
 Components.utils.import('resource://aboutstartup/startupdata.jsm');
 
 function init() {
-  // Wait for StartupData.current
-  try {
-    StartupData.current;
-  } catch(e) {
-    window.setTimeout(init, 500);
-    return;
-  }
   var table = document.getElementById('table');
   var data = StartupData._data;
   var prev;
