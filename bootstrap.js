@@ -48,6 +48,11 @@ function startup(aData, aReason) {
   if (!aData.installPath.isDirectory())
     fileuri = Services.io.newURI('jar:' + fileuri.spec + '!/', null, null);
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', fileuri);
+  Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
+  patchTBWindow.startup({
+    aData: aData, isAppShutdown: aReason == APP_SHUTDOWN
+    , menuItem: {label: "about:startup", id: "aboutStartupMenuitem", url: "about:startup"}
+  });
   Components.utils.import('resource://aboutstartup/startupdata.jsm');
 }
 
@@ -56,6 +61,8 @@ function shutdown(aData, aReason) {
     try {
       StartupData.save();
     } catch(e) {}
+  Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
+  patchTBWindow.shutdown({aData: aData, isAppShutdown: aReason == APP_SHUTDOWN});
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', null);
   Cm.unregisterFactory(AboutStartup.prototype.classID, AboutStartupFactory);
 }
