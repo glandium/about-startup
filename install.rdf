@@ -39,6 +39,15 @@
       </Description>
     </em:targetApplication>
 
+    <!-- Seamonkey -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+        <em:minVersion>2.1</em:minVersion>
+        <em:maxVersion>2.10a1</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
     <!-- Front End MetaData -->
     <em:name>About startup</em:name>
     <em:description>Startup timings display.</em:description>
