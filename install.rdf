@@ -48,6 +48,15 @@
       </Description>
     </em:targetApplication>
 
+    <!-- Thunderbird -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id>
+        <em:minVersion>5.0b1</em:minVersion>
+        <em:maxVersion>12.0a1</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
     <!-- Front End MetaData -->
     <em:name>About startup</em:name>
     <em:description>Startup timings display.</em:description>
