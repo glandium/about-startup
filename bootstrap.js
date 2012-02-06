@@ -50,8 +50,8 @@ function startup(aData, aReason) {
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', fileuri);
   Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
   patchTBWindow.startup({
-    aData: aData, isAppShutdown: aReason == APP_SHUTDOWN
-    , menuItem: {label: "about:startup", id: "aboutStartupMenuitem", url: "about:startup"}
+    isAppShutdown: false,
+    menuItem: {label: "about:startup", id: "aboutStartupMenuitem", url: "about:startup"}
   });
   Components.utils.import('resource://aboutstartup/startupdata.jsm');
 }
@@ -62,7 +62,7 @@ function shutdown(aData, aReason) {
       StartupData.save();
     } catch(e) {}
   Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
-  patchTBWindow.shutdown({aData: aData, isAppShutdown: aReason == APP_SHUTDOWN});
+  patchTBWindow.shutdown({isAppShutdown: true});
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', null);
   Cm.unregisterFactory(AboutStartup.prototype.classID, AboutStartupFactory);
 }
