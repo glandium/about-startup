@@ -9,32 +9,32 @@ function init() {
   var prev;
   var headers_row = table.getElementsByTagName('tr')[0];
   var headers = headers_row.getElementsByTagName('th');
-  for each (var d in Object.keys(data).map(function(k) StartupData.key(data[k][0])).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
+  for each (var d in Object.keys(data).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
     var total = { };
     var num = { };
-    for (var h = 0; h < headers.length; h++) {
+    for (var h = 1; h < headers.length; h++) {
       total[headers[h].textContent] = 0;
       num[headers[h].textContent] = 0;
     }
     for each (var entry in data[d]) {
       var tr = document.createElement('tr');
-      for (var h = 0; h < headers.length; h++) {
+      for (var h = 1; h < headers.length; h++) {
         var td = document.createElement('td');
         var value = entry[headers[h].textContent];
         td.className = headers[h].className;
         td.appendChild(document.createTextNode(value));
-        if (td.className != "string") {
-          if ((value < 0) || isNaN(value)) {
-            td.className += ' weird';
-          } else {
-            total[headers[h].textContent] += value;
-            num[headers[h].textContent]++;
-          }
+        if ((value < 0) || isNaN(value)) {
+          td.className += ' weird';
+        } else {
+          total[headers[h].textContent] += value;
+          num[headers[h].textContent]++;
         }
         tr.appendChild(td);
       }
       Object.keys(entry).filter(function(element, index, array) {
-        for (var h = 0; h < headers.length; h++)
+        if (['version', 'appBuildID'].some(function(elm) { return element == elm; }))
+          return false;
+        for (var h = 1; h < headers.length; h++)
           if (element == headers[h].textContent)
             return false;
 
@@ -65,12 +65,24 @@ function init() {
         table.appendChild(tr);
       prev = tr;
     }
+    var td = document.createElement('td');
+    td.appendChild(document.createTextNode(data[d][0].version));
+    td.appendChild(document.createElement('br'));
+    td.appendChild(document.createTextNode(data[d][0].appBuildID));
+    td.rowSpan = data[d].length;
+    td.className = 'string';
+    tr.insertBefore(td, tr.firstChild);
+
     tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.appendChild(document.createTextNode('average'));
+    td.className = 'string';
+    tr.appendChild(td);
     tr.className = 'average';
-    for (var h = 0; h < headers.length; h++) {
-      var td = document.createElement('td');
+    for (var h = 1; h < headers.length; h++) {
+      td = document.createElement('td');
       td.className = headers[h].className;
-      var value = td.className == "string" ? entry[headers[h].textContent] : (total[headers[h].textContent] / num[headers[h].textContent]).toFixed(2);
+      var value = (total[headers[h].textContent] / num[headers[h].textContent]).toFixed(2);
       td.appendChild(document.createTextNode(value));
       tr.appendChild(td);
     }
