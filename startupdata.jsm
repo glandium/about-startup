@@ -31,23 +31,24 @@ XPCOMUtils.defineLazyGetter(StartupData, '_file', function () {
 
 StartupData.__defineGetter__('_data', function () {
   var fiStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
-  if (!StartupData._file.exists())
-    return {};
-  fiStream.init(StartupData._file, -1, -1, 0);
-  var liStream = fiStream.QueryInterface(Ci.nsILineInputStream);
-
-  var lineData = {};
   var data = {};
-  var cont;
-  do {
-    cont = liStream.readLine(lineData);
-    var entry = JSON.parse(lineData.value);
-    var index = StartupData.key(entry);
-    if (!(index in data))
-      data[index] = new Array();
-    data[index].push(entry);
-  } while (cont);
-  fiStream.close();
+
+  if (StartupData._file.exists()) {
+    fiStream.init(StartupData._file, -1, -1, 0);
+    var liStream = fiStream.QueryInterface(Ci.nsILineInputStream);
+
+    var lineData = {};
+    var cont;
+    do {
+      cont = liStream.readLine(lineData);
+      var entry = JSON.parse(lineData.value);
+      var index = StartupData.key(entry);
+      if (!(index in data))
+        data[index] = new Array();
+      data[index].push(entry);
+    } while (cont);
+    fiStream.close();
+  }
 
   var index = StartupData.key(StartupData.current);
   if (!(index in data))
