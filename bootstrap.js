@@ -35,10 +35,6 @@ AboutStartup.prototype = {
 
 const AboutStartupFactory = XPCOMUtils.generateNSGetFactory([AboutStartup])(AboutStartup.prototype.classID);
 
-const APP_STARTUP = 1;
-const ADDON_ENABLE = 3;
-const ADDON_UPGRADE = 7;
-
 function startup(aData, aReason) {
   Cm.registerFactory(AboutStartup.prototype.classID,
                      AboutStartup.prototype.classDescription,
