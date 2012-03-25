@@ -83,7 +83,7 @@ function startup(options) {
 }
 
 function shutdown() {
-  if (isThunderbird) {
+  if (isThunderbird()) {
     // Un-patch all existing windows
     for each (let w in fixIterator(Services.wm.getEnumerator("mail:3pane")))
       unMonkeyPatchWindow(w);
