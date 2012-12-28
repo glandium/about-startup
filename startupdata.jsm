@@ -17,7 +17,7 @@ StartupData.cmp = function(entry1, entry2) {
   var keys2 = Object.keys(entry2);
   if (keys1.length != keys2.length)
     return false;
-  for each (var key in keys1)
+  for (var key of keys1)
     if (!(key in entry2) || (entry1[key] != entry2[key]))
       return false;
   return true;
@@ -81,7 +81,7 @@ StartupData.__defineGetter__('startupInfo', function () {
 StartupData.__defineGetter__('current', function() {
   var entry = {};
   let thread = Services.tm.currentThread;
-  for each (var key in Object.keys(StartupData.startupInfo).filter(function(k) k != 'process'))
+  for (var key of Object.keys(StartupData.startupInfo).filter(function(k) k != 'process'))
     entry[key] = StartupData.startupInfo[key] - StartupData.startupInfo.process;
 
   entry.version = Services.appinfo.version;

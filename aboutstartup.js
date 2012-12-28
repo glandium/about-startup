@@ -9,14 +9,14 @@ function init() {
   var prev;
   var headers_row = table.getElementsByTagName('tr')[0];
   var headers = headers_row.getElementsByTagName('th');
-  for each (var d in Object.keys(data).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
+  for (var d of Object.keys(data).sort(Cc['@mozilla.org/xpcom/version-comparator;1'].getService(Ci.nsIVersionComparator).compare)) {
     var total = { };
     var num = { };
     for (var h = 1; h < headers.length; h++) {
       total[headers[h].textContent] = 0;
       num[headers[h].textContent] = 0;
     }
-    for each (var entry in data[d]) {
+    for (var entry of data[d]) {
       var tr = document.createElement('tr');
       for (var h = 1; h < headers.length; h++) {
         var td = document.createElement('td');
