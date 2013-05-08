@@ -64,7 +64,7 @@ function startup(options) {
     Cu.import("resource:///modules/iteratorUtils.jsm", global);
 
     // Patch all existing windows
-    for (let w of fixIterator(Services.wm.getEnumerator("mail:3pane"), Ci.nsIDOMWindow)) {
+    for (let w in fixIterator(Services.wm.getEnumerator("mail:3pane"), Ci.nsIDOMWindow)) {
       // True means the window's been loaded already, so add the menu item right
       // away (the default is: wait for the "load" event).
       monkeyPatchWindow(w.window, true);
@@ -85,7 +85,7 @@ function startup(options) {
 function shutdown() {
   if (isThunderbird()) {
     // Un-patch all existing windows
-    for (let w of fixIterator(Services.wm.getEnumerator("mail:3pane")))
+    for (let w in fixIterator(Services.wm.getEnumerator("mail:3pane")))
       unMonkeyPatchWindow(w);
     
     _menuItem = null;
