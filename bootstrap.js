@@ -35,6 +35,15 @@ AboutStartup.prototype = {
 
 const AboutStartupFactory = XPCOMUtils.generateNSGetFactory([AboutStartup])(AboutStartup.prototype.classID);
 
+XPCOMUtils.defineLazyGetter(this, "patchTBWindow", function () {
+  let APP_ID = Services.appinfo.QueryInterface(Ci.nsIXULRuntime).ID;
+  if (APP_ID == "{3550f703-e582-4d05-9a08-453d09bdfdc6}") {
+    let { patchTBWindow } = Components.utils.import('resource://aboutstartup/patchtbwindow.jsm', {});
+    return patchTBWindow;
+  }
+  return undefined;
+});
+
 function startup(aData, aReason) {
   Cm.registerFactory(AboutStartup.prototype.classID,
                      AboutStartup.prototype.classDescription,
@@ -44,10 +53,11 @@ function startup(aData, aReason) {
   if (!aData.installPath.isDirectory())
     fileuri = Services.io.newURI('jar:' + fileuri.spec + '!/', null, null);
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', fileuri);
-  Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
-  patchTBWindow.startup({
-    menuItem: {label: "about:startup", id: "aboutStartupMenuitem", url: "about:startup"}
-  });
+  if (patchTBWindow) {
+    patchTBWindow.startup({
+      menuItem: {label: "about:startup", id: "aboutStartupMenuitem", url: "about:startup"}
+    });
+  }
   Components.utils.import('resource://aboutstartup/startupdata.jsm');
 }
 
@@ -57,8 +67,9 @@ function shutdown(aData, aReason) {
       StartupData.save();
     } catch(e) {}
   } else {
-    Components.utils.import('resource://aboutstartup/patchtbwindow.jsm');
-    patchTBWindow.shutdown();
+    if (patchTBWindow) {
+      patchTBWindow.shutdown();
+    }
   }
   Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler).setSubstitution('aboutstartup', null);
   Cm.unregisterFactory(AboutStartup.prototype.classID, AboutStartupFactory);
